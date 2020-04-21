@@ -20,7 +20,9 @@ public class cmdHelp implements Command {
         for (String s: commandHandler.commands.keySet()) {
             Command cmd = commandHandler.commands.get(s);
             if (cmd.isPrivate())continue;
-            eb.addField(s,cmd.Def(),false);
+            String def = cmd.Def();
+            if (def==null) def = "<Keine Beschreibung verfügbar!>";
+            eb.addField(s,def,false);
         }
         eb.setFooter("Angefordert von "+ Objects.requireNonNull(event.getMember()).getEffectiveName());
         event.getTextChannel().sendMessage(eb.build()).queue();
