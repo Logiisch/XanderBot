@@ -36,7 +36,7 @@ public class Main {
 
 
         builder.setActivity(Activity.playing(Version));
-        System.out.println("Starte auf " + Version + " ...");
+        System.out.println("Starte auf " + Version + " ...|Written by Logii");
         addListeners();
         addCommands();
         //readInStartValues();
