@@ -2,13 +2,11 @@ package core;
 
 
 
-import commands.cmdChannelHide;
-import commands.cmdCode;
-import commands.cmdHelp;
-import commands.cmdShutdown;
+import commands.*;
 import listeners.commandListener;
 import listeners.readyListener;
 import listeners.serverStatsListener;
+import listeners.turnierReactListener;
 import net.dv8tion.jda.api.AccountType;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.JDABuilder;
@@ -32,11 +30,11 @@ public class Main {
         builder.setToken(SECRETS.getTOKEN());
         builder.setAutoReconnect(true);
         builder.setStatus(OnlineStatus.ONLINE);
-        String Version = STATIC.VERSION;
+        String Version = STATIC.VERSION+"||Written by Logii";
 
 
         builder.setActivity(Activity.playing(Version));
-        System.out.println("Starte auf " + Version + " ...|Written by Logii");
+        System.out.println("Starte auf " + Version + " ...");
         addListeners();
         addCommands();
         //readInStartValues();
@@ -56,6 +54,7 @@ public class Main {
         builder.addEventListeners(new commandListener());
         builder.addEventListeners(new readyListener());
         //builder.addEventListeners(new serverStatsListener());
+        builder.addEventListeners(new turnierReactListener());
 
 
     }
@@ -65,6 +64,7 @@ public class Main {
         commandHandler.commands.put("help", new cmdHelp());
         commandHandler.commands.put("shutdown", new cmdShutdown());
         commandHandler.commands.put("code", new cmdCode());
+        commandHandler.commands.put("turnier", new cmdTurnier());
 
 
     }
