@@ -26,12 +26,14 @@ public class Turnier {
     private boolean notification;
     private ArrayList<User> registerd = new ArrayList<>();
     private RegStat regStat;
+    private MatchType matchtype;
 
     public Turnier(User u) {
         autor=u;
-        regStat = RegStat.NEEDPLAYERCOUNT;
+        regStat = RegStat.NEEDMATCHTYPE;
     }
-    private Turnier(User autorn,int spielerzahln, String spielnamen, String einstellungenn, Message messagen, boolean notificationn, ArrayList<User> registerdn,RegStat regStatn) {
+
+    private Turnier(User autorn, int spielerzahln, String spielnamen, String einstellungenn, Message messagen, boolean notificationn, ArrayList<User> registerdn, RegStat regStatn, MatchType matchtypen) {
         autor = autorn;
         spielerzahl = spielerzahln;
         spielname = spielnamen;
@@ -40,6 +42,7 @@ public class Turnier {
         notification = notificationn;
         registerd = registerdn;
         regStat = regStatn;
+        matchtype = matchtypen;
     }
     public User getAutor() {
         return autor;
@@ -79,48 +82,31 @@ public class Turnier {
         msg = ms;
     }
 
-    public MessageEmbed getEmbed() {
-        EmbedBuilder eb = new EmbedBuilder();
-        eb.setTitle(autor.getName()+"'s Turnier");
-        eb.addField("Es wird gespielt",spielname,false);
-        int restpl = spielerzahl-registerd.size();
-        eb.addField("Freie Plätze",restpl+"",false);
-        if (!einstellungen.equalsIgnoreCase("")) eb.appendDescription("Zusätzliche Hinweise:").appendDescription(einstellungen);
-        eb.setFooter("Reagiere mit :thumbsup:,  um dich für das Turnier anzumelden!");
-        return eb.build();
-    }
-
-    public static int getNextNumber() {
-        int i=1;
-        while (list.containsKey(i)) i++;
-        return i;
-    }
-
-    public enum RegStat {
-        NEEDPLAYERCOUNT,
-        NEEDGAMENAME,
-        NEEDDESCRIPTION,
-        NEEDNOTIFICATION,
-        DONE,
-        STARTED
-    }
     public static void onCreationFinished(int id) {
-        turnierReactListener.toSupervise.put(list.get(id).msg.getId(),id);
-        list.get(id).msg.addReaction("U+1F44D").queue();
+        list.get(id).getMsg().addReaction("U+1F44D").queue();
+        turnierReactListener.toSupervise.put(list.get(id).getMsg().getId(), id);
         save();
     }
 
     public static void refreshMembers(int turnum,boolean messageonfull) {
-        Message msg = list.get(turnum).msg;
-        List<MessageReaction> mrs =msg.getReactions();
+        refreshMembers(turnum, messageonfull, true);
+    }
+
+    public static void refreshMembers(int turnum, boolean messageonfull, boolean withoutput) {
+
+        //If the next line just wold be list.get(turnum).msg, the line List<MessageReaction> mrs = msg.getReactions(); would sometimes return zero results
+        Message msg = Objects.requireNonNull(list.get(turnum).msg.getJDA().getTextChannelById(list.get(turnum).msg.getTextChannel().getId())).getHistoryAround(list.get(turnum).msg.getId(), 5).complete().getMessageById(list.get(turnum).msg.getId());
+        assert msg != null;
+        List<MessageReaction> mrs = msg.getReactions();
         for (MessageReaction mr:mrs) {
             if (!mr.getReactionEmote().getName().equalsIgnoreCase("\uD83D\uDC4D"))continue;
             List<User> usrs =mr.retrieveUsers().complete();
-            compUsers(turnum,usrs,messageonfull);
+            compUsers(turnum, usrs, messageonfull, withoutput);
         }
         save();
     }
-    private static void compUsers(int turnum,List<User> usrs,boolean mesaageonfull) {
+
+    private static void compUsers(int turnum, List<User> usrs, boolean mesaageonfull, boolean withoutput) {
         Turnier tn = list.get(turnum);
         User slf = usrs.get(0).getJDA().getSelfUser();
         usrs.remove(slf);
@@ -172,7 +158,7 @@ public class Turnier {
             tn.registerd.removeAll(removed);
         }
 
-        if (tn.notification) {
+        if (tn.notification && withoutput) {
             tn.autor.openPrivateChannel().complete().sendMessage("Insgesamt sind damit nun "+tn.registerd.size()+" Spieler deinem Turnier beigetreten!").queue();
 
         }
@@ -186,22 +172,13 @@ public class Turnier {
 
 
     }
-    //Saving/loading it to permanent memory
-    //Syntax: Seperator:§
-    //id,autorid,spielerzahl,spielname,einstellungen,messageid,textchannelid,notification,regusers,restat
-    //id: just numeric value
-    //autorid: id of the autor, numeric value
-    //spielerzahl: numeric value
-    //spielname: as text
-    //EInstellungen: as text
-    //messageid, as numeric value
-    //textchannelid: as numeric value
-    //notification: booleans written out
-    //regusersids: seperated by ,
-    //restat: All caps
 
+    public static int[] userlimit(MatchType mt) {
+        if (mt.equals(MatchType.KOSYSTEM)) return new int[]{4, 8, 16, 32};
+        return new int[]{};
+    }
 
-    private static void save() {
+    public static void save() {
         Set<Integer> numbrs =list.keySet();
         ArrayList<String> out = new ArrayList<>();
         for (int nbr: numbrs) {
@@ -215,6 +192,7 @@ public class Turnier {
         }
 
     }
+
     private static String saveSingle(int nummer, Turnier tn) {
         String out = nummer+"§";//0
         out += tn.autor.getId()+"§";//1
@@ -231,10 +209,18 @@ public class Turnier {
         }
         part = part.replaceFirst(",", "");
         out += part+"§";//8
-        out += tn.regStat.toString().toUpperCase();//9
+        out += tn.regStat.toString().toUpperCase() + "§";//9
+        out += tn.matchtype.toString().toUpperCase();//10
         return out;
 
     }
+
+    public static int getNextNumber() {
+        int i = 1;
+        while (list.containsKey(i)) i++;
+        return i;
+    }
+
     private static int load(String whole,JDA jda) throws Exception {
         String[] split = whole.split("§");
         int nbr = Integer.parseInt(split[0]);
@@ -242,7 +228,7 @@ public class Turnier {
         int spielerzahl = Integer.parseInt(split[2]);
         String Spielname = split[3];
         String Einstellungen = split[4];
-        Message msg = Objects.requireNonNull(jda.getTextChannelById(split[6])).getHistoryAround(split[5],5).complete().getMessageById(split[5]);
+        Message msg = Objects.requireNonNull(jda.getTextChannelById(split[6])).getHistoryAround(split[5], 5).complete().getMessageById(split[5]);
         boolean notify = false;
         if (split[7].equalsIgnoreCase("true")) notify = true;
         ArrayList<User> registerd = new ArrayList<>();
@@ -253,11 +239,13 @@ public class Turnier {
              }
          }
         RegStat rs = RegStat.valueOf(split[9]);
-        Turnier tn = new Turnier(autor,spielerzahl,Spielname,Einstellungen,msg,notify,registerd,rs);
+        MatchType mt = MatchType.valueOf(split[10]);
+        Turnier tn = new Turnier(autor, spielerzahl, Spielname, Einstellungen, msg, notify, registerd, rs, mt);
         list.put(nbr,tn);
         return nbr;
 
     }
+
     public static void load(JDA jda) {
         ArrayList<String> in = new ArrayList<>();
         try {
@@ -271,7 +259,7 @@ public class Turnier {
             int nbr = 0;
             try {
                 nbr = load(s,jda);
-                refreshMembers(nbr,false);
+                refreshMembers(nbr, false, false);
                 turnierReactListener.toSupervise.put(list.get(nbr).msg.getId(),nbr);
                 System.out.println("Loaded turnier nbr. "+nbr);
             } catch (Exception e) {
@@ -279,6 +267,134 @@ public class Turnier {
             }
 
         }
+    }
+
+    public static boolean delete(int id) {
+        ArrayList<String> in = new ArrayList<>();
+        try {
+            in = readInTxtFile.Read("data/turniere.txt");
+        } catch (IOException e) {
+            System.err.println("turniere.txt konnte nicht geladen werden!");
+            e.printStackTrace();
+            return false;
+        }
+        String torem = "";
+        for (String s : in) {
+            if (s.startsWith(id + "")) torem = s;
+        }
+        if (torem.equalsIgnoreCase("")) {
+            System.out.println("ID net jefunden!" + id);
+            return false;
+        }
+        in.remove(torem);
+        try {
+            printOutTxtFile.Write("data/turniere.txt", in);
+        } catch (IOException e) {
+            e.printStackTrace();
+            return false;
+        }
+        list.get(id).getMsg().delete().queue();
+        list.remove(id);
+
+        return true;
+    }
+
+    public static boolean playerCountSinnvoll(int pc) {
+        return pc >= 3;
+    }
+
+    public MatchType getMatchtype() {
+        return matchtype;
+    }
+
+    public void setMatchtype(MatchType mt) {
+        matchtype = mt;
+    }
+
+    public Message getMsg() {
+        return msg;
+    }
+
+    public int getCurrentPlayerCount() {
+        return registerd.size();
+    }
+    //Saving/loading it to permanent memory
+    //Syntax: Seperator:§
+    //id,autorid,spielerzahl,spielname,einstellungen,messageid,textchannelid,notification,regusers,restat,MatchType
+    //id: just numeric value
+    //autorid: id of the autor, numeric value
+    //spielerzahl: numeric value
+    //spielname: as text
+    //EInstellungen: as text
+    //messageid, as numeric value
+    //textchannelid: as numeric value
+    //notification: booleans written out
+    //regusersids: seperated by ,
+    //restat: All caps
+    //MatchType: All caps
+
+    public ArrayList<User> getRegisterd() {
+        return registerd;
+    }
+
+    public boolean getNotification() {
+        return notification;
+    }
+
+    public MessageEmbed getEmbed() {
+        EmbedBuilder eb = new EmbedBuilder();
+        eb.setTitle(autor.getName() + "'s Turnier");
+        eb.addField("Es wird gespielt", spielname, false);
+        int restpl = spielerzahl - registerd.size();
+        eb.addField("Freie Plätze", restpl + "", false);
+        String mt = "";
+        switch (matchtype) {
+            case KOSYSTEM:
+                mt = "KO-System";
+                break;
+            case GRUPPENSYSTEM:
+                mt = "Jeder spielt gegen jeden";
+        }
+        eb.addField("Turniertyp", mt, false);
+        if (!einstellungen.equalsIgnoreCase(""))
+            eb.appendDescription("Zusätzliche Hinweise:").appendDescription(einstellungen);
+        eb.setFooter("Reagiere mit :thumbsup:,  um dich für das Turnier anzumelden!");
+        return eb.build();
+    }
+
+    public void kick(User u) {
+        registerd.remove(u);
+        Message msg = Objects.requireNonNull(getMsg().getJDA().getTextChannelById(getMsg().getTextChannel().getId())).getHistoryAround(getMsg().getId(), 5).complete().getMessageById(getMsg().getId());
+        assert msg != null;
+        List<MessageReaction> mrs = msg.getReactions();
+        for (MessageReaction mr : mrs) {
+            if (!mr.getReactionEmote().getName().equalsIgnoreCase("\uD83D\uDC4D")) continue;
+            mr.removeReaction(u).queue();
+        }
+    }
+
+    public enum RegStat {
+        //Creation
+        NEEDMATCHTYPE,
+        NEEDPLAYERCOUNT,
+        NEEDGAMENAME,
+        NEEDDESCRIPTION,
+        NEEDNOTIFICATION,
+        DONE,
+        //Set-Menu
+        SETMAIN,
+        SETPLAYERCOUNT,
+        SETGAMENAME,
+        SETDESCRIPTION,
+        SETNOTIFICATION,
+        SETKICK,
+        SETMATCHTYPE,
+        SETDELETE
+    }
+
+    public enum MatchType {
+        KOSYSTEM,
+        GRUPPENSYSTEM
     }
 
 }

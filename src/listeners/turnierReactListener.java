@@ -15,7 +15,6 @@ public class turnierReactListener extends ListenerAdapter {
     //richtiges Emote.getName: "👍"
 
     public void onGuildMessageReactionAdd(@Nonnull GuildMessageReactionAddEvent event) {
-
         if (!toSupervise.containsKey(event.getMessageId())) return;
         if (!event.getReaction().getReactionEmote().getName().equalsIgnoreCase("\uD83D\uDC4D")) {
             System.out.println("Habe Reaktion "+ event.getReaction().getReactionEmote().getName()+ "erhalten!");

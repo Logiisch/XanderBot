@@ -1,11 +1,9 @@
 package core;
 
 
-
 import commands.*;
 import listeners.commandListener;
 import listeners.readyListener;
-import listeners.serverStatsListener;
 import listeners.turnierReactListener;
 import net.dv8tion.jda.api.AccountType;
 import net.dv8tion.jda.api.JDA;
@@ -16,10 +14,6 @@ import util.SECRETS;
 import util.STATIC;
 
 import javax.security.auth.login.LoginException;
-import java.util.ArrayList;
-import java.util.List;
-
-import static util.readInTxtFile.Read;
 
 public class Main {
     public static JDABuilder builder = new JDABuilder(AccountType.BOT);
@@ -30,10 +24,10 @@ public class Main {
         builder.setToken(SECRETS.getTOKEN());
         builder.setAutoReconnect(true);
         builder.setStatus(OnlineStatus.ONLINE);
-        String Version = STATIC.VERSION+"||Written by Logii";
+        String Version = STATIC.VERSION;
 
 
-        builder.setActivity(Activity.playing(Version));
+        builder.setActivity(Activity.playing(Version + "|Written by Logii"));
         System.out.println("Starte auf " + Version + " ...");
         addListeners();
         addCommands();
@@ -65,6 +59,7 @@ public class Main {
         commandHandler.commands.put("shutdown", new cmdShutdown());
         commandHandler.commands.put("code", new cmdCode());
         commandHandler.commands.put("turnier", new cmdTurnier());
+        commandHandler.commands.put("commands", new cmdCommands());
 
 
     }

@@ -17,6 +17,8 @@ public class commandListener extends ListenerAdapter {
     public static List<User> Blocked = new ArrayList<>();
     public static HashMap<Guild, String> cstmPrfx = new HashMap<>();
     public static ArrayList<String> log = new ArrayList<>();
+
+    public static HashMap<Guild, ArrayList<String>> blockedCmds = new HashMap<>();
     @Override
     public void onMessageReceived(MessageReceivedEvent event) {
         String CD = event.getMessage().getContentDisplay();
@@ -43,6 +45,21 @@ public class commandListener extends ListenerAdapter {
                 event.getAuthor().openPrivateChannel().complete().sendMessage("Du bist aktuell im Cleverbot-Mudus. Um ihn zu verlassen, gib ``stop`` ein!").queue();
                 return;
             }*/
+            if (blockedCmds.containsKey(event.getGuild())) {
+                if (!event.getMessage().getContentDisplay().startsWith("x!commands")) {
+                    if (blockedCmds.get(event.getGuild()).contains("all")) {
+                        event.getTextChannel().sendMessage("Aktuell sind alle Befehle auf dem Server blockiert!").queue();
+                        return;
+                    }
+                    for (String s : blockedCmds.get(event.getGuild())) {
+                        if (event.getMessage().getContentDisplay().toLowerCase().startsWith(getPrefix(event.getGuild()) + s.toLowerCase())) {
+                            event.getTextChannel().sendMessage("Dieser Befehl ist aktuell auf dem Server blockiert!").queue();
+                            return;
+                        }
+                    }
+                }
+
+            }
             try {
                 writeCmd(event);
                 commandHandler.handleCommand(commandHandler.parser.parse(CD,  event));
