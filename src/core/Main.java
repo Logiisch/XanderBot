@@ -5,6 +5,7 @@ import commands.*;
 import listeners.commandListener;
 import listeners.readyListener;
 import listeners.turnierReactListener;
+import listeners.verifyListener;
 import net.dv8tion.jda.api.AccountType;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.JDABuilder;
@@ -12,8 +13,6 @@ import net.dv8tion.jda.api.OnlineStatus;
 import net.dv8tion.jda.api.entities.Activity;
 import util.SECRETS;
 import util.STATIC;
-
-import javax.security.auth.login.LoginException;
 
 public class Main {
     public static JDABuilder builder = new JDABuilder(AccountType.BOT);
@@ -36,8 +35,6 @@ public class Main {
         try {
             JDA jda = builder.build();
             StartThreads(jda);
-        } catch (LoginException e) {
-            e.printStackTrace();
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -49,6 +46,7 @@ public class Main {
         builder.addEventListeners(new readyListener());
         //builder.addEventListeners(new serverStatsListener());
         builder.addEventListeners(new turnierReactListener());
+        builder.addEventListeners(new verifyListener());
 
 
     }
