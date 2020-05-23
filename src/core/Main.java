@@ -2,10 +2,10 @@ package core;
 
 
 import commands.*;
+import listeners.abstimmungsListener;
 import listeners.commandListener;
 import listeners.readyListener;
 import listeners.turnierReactListener;
-import listeners.verifyListener;
 import net.dv8tion.jda.api.AccountType;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.JDABuilder;
@@ -46,7 +46,7 @@ public class Main {
         builder.addEventListeners(new readyListener());
         //builder.addEventListeners(new serverStatsListener());
         builder.addEventListeners(new turnierReactListener());
-        builder.addEventListeners(new verifyListener());
+        builder.addEventListeners(new abstimmungsListener());
 
 
     }

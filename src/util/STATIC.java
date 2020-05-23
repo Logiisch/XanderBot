@@ -16,8 +16,7 @@ public class STATIC {
 
     public static boolean LOOPBOLEAN = true;
 
-    public static String ROLE_UNVERIFIED = "701837206733455401";
-    public static String ROLE_VERIFIED = "707519971583983696";
+    public static String[] VOTECHANNELS = {"702173171519979630", "708828326986514532"};
 
 
 }
