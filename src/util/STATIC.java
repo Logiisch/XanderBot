@@ -1,12 +1,9 @@
 package util;
 
-/*import Threads.HiskiGiveawayThread;
-import Threads.TimerThread;
-import commands.cmdGetPoints;
-import listeners.activityListener;*/
+
 
 public class STATIC {
-    public static String VERSION = "4.5.final";
+    public static String VERSION = "4.6";
     public static String PREFIX = "x!";
     public static String ADDLINK = "https://discordapp.com/oauth2/authorize?client_id=701952667131445299&scope=bot&permissions=269610064";
     public static String CODELINK = "https://github.com/Logiisch/XanderBot";
@@ -16,7 +13,7 @@ public class STATIC {
 
     public static boolean LOOPBOLEAN = true;
 
-    public static String[] VOTECHANNELS = {"702173171519979630", "708828326986514532"};
+    public static String[] VOTECHANNELS = {"769710375418724372", "7769712489108865085"};
 
 
 }

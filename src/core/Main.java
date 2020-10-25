@@ -11,15 +11,21 @@ import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.JDABuilder;
 import net.dv8tion.jda.api.OnlineStatus;
 import net.dv8tion.jda.api.entities.Activity;
+import net.dv8tion.jda.api.requests.GatewayIntent;
 import util.SECRETS;
 import util.STATIC;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+
 public class Main {
-    public static JDABuilder builder = new JDABuilder(AccountType.BOT);
+    public static JDABuilder builder = JDABuilder.create(new ArrayList<>());
 
     public static void main(String[] args) {
         // JDABuilder builder = new JDABuilder(AccountType.BOT);
         if (!SECRETS.loadTokens()) return;
+        ArrayList<GatewayIntent> gis = new ArrayList<>(Arrays.asList(GatewayIntent.values()));
+        builder = JDABuilder.create(gis);
         builder.setToken(SECRETS.getTOKEN());
         builder.setAutoReconnect(true);
         builder.setStatus(OnlineStatus.ONLINE);
