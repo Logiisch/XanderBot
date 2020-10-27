@@ -13,7 +13,7 @@ public class STATIC {
 
     public static boolean LOOPBOLEAN = true;
 
-    public static String[] VOTECHANNELS = {"770428411990507539", "7769712489108865085"};
+    public static String[] VOTECHANNELS = {"770428411990507539", "769712489108865085"};
 
 
 }

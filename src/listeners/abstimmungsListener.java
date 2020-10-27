@@ -22,9 +22,10 @@ public class abstimmungsListener extends ListenerAdapter {
 
     private void addReacts(Message m) {
         try {
-
-            m.addReaction("U+2705").complete();
-            m.addReaction("U+274E").complete();
+            Emote yes = m.getGuild().getEmotesByName("yes",true).get(0);
+            Emote no = m.getGuild().getEmotesByName("no",true).get(0);
+            m.addReaction(yes).complete();
+            m.addReaction(no).complete();
         } catch (Exception e) {
             Message erm = m.getChannel().sendMessage("Error while reacting to MSG!").complete();
             Timer t = new Timer();
