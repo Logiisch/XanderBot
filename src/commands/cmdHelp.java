@@ -16,7 +16,7 @@ public class cmdHelp implements Command {
 
     @Override
     public void action(String[] args, MessageReceivedEvent event) throws IOException {
-        EmbedBuilder eb = new EmbedBuilder().setColor(getRandomColor()).setTitle("Xander's Hilfe");
+        EmbedBuilder eb = new EmbedBuilder().setColor(new Color(114,137,218)).setTitle("Xander's Hilfe");
         for (String s: commandHandler.commands.keySet()) {
             Command cmd = commandHandler.commands.get(s);
             if (cmd.isPrivate())continue;
