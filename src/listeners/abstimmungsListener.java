@@ -7,6 +7,7 @@ import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import util.STATIC;
 
 import javax.annotation.Nonnull;
+import java.util.ArrayList;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -14,7 +15,9 @@ public class abstimmungsListener extends ListenerAdapter {
 
     public void onGuildMessageReceived(@Nonnull GuildMessageReceivedEvent event) {
         if(event.getAuthor().getId().equalsIgnoreCase(event.getJDA().getSelfUser().getId())) return;
-        for (String s : STATIC.VOTECHANNELS) {
+        if (!STATIC.votechannels.containsKey(event.getGuild().getId())) return;
+        ArrayList<String> vcs = STATIC.votechannels.get(event.getGuild().getId());
+        for (String s : vcs) {
             if (event.getChannel().getId().equalsIgnoreCase(s)) addReacts(event.getMessage());
         }
 

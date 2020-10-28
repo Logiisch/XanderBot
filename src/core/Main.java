@@ -40,6 +40,7 @@ public class Main {
 
         try {
             JDA jda = builder.build();
+            STATIC.load(jda);
             StartThreads(jda);
         } catch (Exception e) {
             e.printStackTrace();
@@ -64,6 +65,7 @@ public class Main {
         commandHandler.commands.put("code", new cmdCode());
         commandHandler.commands.put("turnier", new cmdTurnier());
         commandHandler.commands.put("commands", new cmdCommands());
+        commandHandler.commands.put("votechannel",new cmdVotechannel());
 
 
     }
